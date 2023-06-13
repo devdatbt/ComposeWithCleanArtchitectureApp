@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">NoteComposeApp</string>
+    <string name="tv_save">Save</string>
+    <string name="tv_title">Title</string>
+    <string name="tv_content">Content</string>
+    <string name="tv_title_note_app">Home</string>
+    <string name="tv_update_note_app">Update Note</string>
+    <string name="tv_pls_enter_field">Pls enter all field!</string>
+    <string name="tv_lists_note">Lists note</string>
+</resources>
