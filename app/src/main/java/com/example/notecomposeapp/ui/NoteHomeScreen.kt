@@ -32,9 +32,7 @@ fun NoteHomeScreen(
 ) {
     val notes = viewModel.listNoteState.collectAsStateWithLifecycle()
     val currency = viewModel.statusGetCurrencyApi.observeAsState()
-   // val statusNote = viewModel.statusNote.observeAsState()
     val scaffoldState = rememberScaffoldState()
-   // val scope = rememberCoroutineScope()
 
     Scaffold(
         backgroundColor = MyAppTheme.color.backgroundApp,
