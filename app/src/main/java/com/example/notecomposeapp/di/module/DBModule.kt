@@ -1,6 +1,6 @@
 package com.example.notecomposeapp.di.module
 
-import android.app.Application
+import android.content.Context
 import com.example.data.datasource.local.NoteDao
 import com.example.data.datasource.local.NoteDatabase
 import dagger.Module
@@ -16,8 +16,8 @@ object DBModule {
 
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext application: Application): NoteDatabase =
-        NoteDatabase.getInstance(application)
+    fun provideDatabase(@ApplicationContext context: Context): NoteDatabase =
+        NoteDatabase.getInstance(context)
 
     @Provides
     @Singleton
