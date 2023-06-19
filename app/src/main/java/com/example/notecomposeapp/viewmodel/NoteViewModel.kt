@@ -1,5 +1,6 @@
 package com.example.notecomposeapp.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -17,7 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NoteViewModel @Inject constructor(private val appUseCase: AppUseCase) : BaseViewModel() {
-
+    private val LOG_TAG = NoteViewModel::class.java.simpleName
     private val _statusGetCurrency: MutableLiveData<Resource<Currency>> = MutableLiveData()
     val statusGetCurrencyApi: LiveData<Resource<Currency>>
         get() = _statusGetCurrency
@@ -33,11 +34,19 @@ class NoteViewModel @Inject constructor(private val appUseCase: AppUseCase) : Ba
 
     private fun getAllNoteFromDB() {
         launchDataLoad {
-            appUseCase.getNoteListsUseCase.invoke().onEach {
-                _listNoteState.value = it
-            }.catch {
-                 this.emit(emptyList())
-            }.launchIn(viewModelScope)
+            appUseCase.getNoteListsUseCase.invoke()
+                .catch {
+                    this.emit(emptyList())
+                }
+                .onCompletion { cause ->
+                    if (cause == null)
+                        Log.e(LOG_TAG, "Success ${Thread.currentThread().name}")
+                    else
+                        Log.e(LOG_TAG, "Failed: $cause")
+                }
+                .collect {
+                    _listNoteState.value = it
+                }
         }
     }
 
@@ -45,7 +54,8 @@ class NoteViewModel @Inject constructor(private val appUseCase: AppUseCase) : Ba
         launchDataLoad {
             _listNoteState.value.asFlow()
                 .filter {
-                it.title.equals(keyWord) }
+                    it.title.equals(keyWord)
+                }
                 .flowOn(Dispatchers.Default)
                 .launchIn(viewModelScope)
         }
