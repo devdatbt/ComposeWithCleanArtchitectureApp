@@ -6,6 +6,7 @@ import com.example.domain.model.Note
 import com.example.domain.repository.NoteRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -22,6 +23,7 @@ class NoteRepositoryImpl @Inject constructor(private val noteDao: NoteDao) : Not
                     itemNote.toNote()
                 }
             }.flowOn(dispatcherDefault)
+            .conflate()
 
     override suspend fun insertNote(note: Note) = withContext(dispatcherDefault) {
         val noteEntity = NoteEntity.fromNote(note)
@@ -44,5 +46,6 @@ class NoteRepositoryImpl @Inject constructor(private val noteDao: NoteDao) : Not
                 it.toNote()
             }
             .flowOn(dispatcherDefault)
+            .conflate()
     }
 }
