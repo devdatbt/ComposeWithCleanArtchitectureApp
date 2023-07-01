@@ -30,7 +30,7 @@ fun NoteHomeScreen(
     navController: NavController = NavController(LocalContext.current),
     viewModel: NoteViewModel = hiltViewModel()
 ) {
-    val notes = viewModel.listNoteState.collectAsStateWithLifecycle()
+    val notes = viewModel.listNoteStateIn.collectAsStateWithLifecycle(emptyList())
     val currency = viewModel.statusGetCurrencyApi.observeAsState()
     val scaffoldState = rememberScaffoldState()
 
