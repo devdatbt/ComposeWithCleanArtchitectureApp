@@ -19,22 +19,11 @@ import javax.inject.Inject
 @HiltViewModel
 class NoteViewModel @Inject constructor(private val appUseCase: AppUseCase) : BaseViewModel() {
     private val LOG_TAG = NoteViewModel::class.java.simpleName
+
     private val _statusGetCurrency: MutableLiveData<Resource<Currency>> = MutableLiveData()
-    val statusGetCurrencyApi: LiveData<Resource<Currency>>
-        get() = _statusGetCurrency
+    val statusGetCurrencyApi: LiveData<Resource<Currency>> get() = _statusGetCurrency
 
-    private var _listNoteState = MutableStateFlow<List<Note>>(emptyList())
-    val listNoteState = _listNoteState.asStateFlow()
-
-
-    init {
-        getCurrencyFromServer()
-        getAllNoteFromDB()
-    }
-
-    private fun getAllNoteFromDB() {
-        launchDataLoad {
-            appUseCase.getNoteListsUseCase.invoke()
+    val listNoteShareIn = appUseCase.getNoteListsUseCase.invoke()
                 .catch {
                     this.emit(emptyList())
                 }
@@ -43,21 +32,22 @@ class NoteViewModel @Inject constructor(private val appUseCase: AppUseCase) : Ba
                         Log.e(LOG_TAG, "Success ${Thread.currentThread().name}")
                     else
                         Log.e(LOG_TAG, "Failed: $cause")
-                }
-                .collect {
-                    _listNoteState.value = it
-                }
-        }
+                }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000))
+
+    private var _listNoteStateIn = MutableStateFlow<List<Note>>(emptyList())
+    val listNoteStateIn get() = _listNoteStateIn.asStateFlow()
+
+    init {
+        //getCurrencyFromServer()
+        getAllNoteFromDB()
     }
 
-    private fun searchNoteWith(keyWord: String) {
+    private fun getAllNoteFromDB() {
         launchDataLoad {
-            _listNoteState.value.asFlow()
-                .filter {
-                    it.title.equals(keyWord)
+            appUseCase.getNoteListsUseCase.invoke()
+                .collectLatest {
+                    _listNoteStateIn.value = it
                 }
-                .flowOn(Dispatchers.Default)
-                .launchIn(viewModelScope)
         }
     }
 
