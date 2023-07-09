@@ -10,44 +10,49 @@ import com.example.notecomposeapp.usecase.AppUseCase
 import com.example.notecomposeapp.utils.EventNote
 import com.example.notecomposeapp.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class NoteViewModel @Inject constructor(private val appUseCase: AppUseCase) : BaseViewModel() {
-    private val LOG_TAG = NoteViewModel::class.java.simpleName
+    private val TAG = NoteViewModel::class.java.simpleName
 
     private val _statusGetCurrency: MutableLiveData<Resource<Currency>> = MutableLiveData()
     val statusGetCurrencyApi: LiveData<Resource<Currency>> get() = _statusGetCurrency
 
     val listNoteShareIn = appUseCase.getNoteListsUseCase.invoke()
-                .catch {
-                    this.emit(emptyList())
-                }
-                .onCompletion { cause ->
-                    if (cause == null)
-                        Log.e(LOG_TAG, "Success ${Thread.currentThread().name}")
-                    else
-                        Log.e(LOG_TAG, "Failed: $cause")
-                }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000))
+        .catch {
+            this.emit(emptyList())
+        }.onCompletion { isSuccessfully ->
+            if (isSuccessfully == null)
+                Log.e(TAG, "Success ${Thread.currentThread().name}")
+            else
+                Log.e(TAG, "Failed: $isSuccessfully")
+        }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000))
 
+    /** Flow to StateFlow */
     private var _listNoteStateIn = MutableStateFlow<List<Note>>(emptyList())
     val listNoteStateIn get() = _listNoteStateIn.asStateFlow()
 
     init {
-        //getCurrencyFromServer()
+        getCurrencyFromServer()
         getAllNoteFromDB()
     }
 
     private fun getAllNoteFromDB() {
         launchDataLoad {
             appUseCase.getNoteListsUseCase.invoke()
-                .collectLatest {
+                .onEach {
                     _listNoteStateIn.value = it
                 }
+                .catch { emit(emptyList()) }
+                .onCompletion { isSuccessfully ->
+                    if (isSuccessfully == null)
+                        Log.e(TAG, "getAllNoteFromDB Success ${Thread.currentThread().name}")
+                    else
+                        Log.e(TAG, "getAllNoteFromDB Failed: $isSuccessfully")
+                }.stateIn(viewModelScope)
         }
     }
 
@@ -84,9 +89,12 @@ class NoteViewModel @Inject constructor(private val appUseCase: AppUseCase) : Ba
     private fun launchDataLoad(block: suspend () -> Unit): Job {
         return viewModelScope.launch {
             try {
+                Log.e(TAG, "launchDataLoad is run with thread: ${Thread.currentThread().name}")
                 block.invoke()
             } catch (error: Throwable) {
                 error.printStackTrace()
+            } finally {
+                Log.e(TAG, "launchDataLoad is finally with thread: ${Thread.currentThread().name}")
             }
         }
     }
