@@ -1,8 +1,9 @@
 # CleanArchitecture Hilt Coroutine Flow
 
 Technologies:
+- Compose
+- Coroutine, Flow
 - Clean Architecture (Design Pattern)
-- Dagger 2 (Dependence Inject)
-- Rx Android, Rx Java
+- Dagger Hilt (Dependence Inject)
 - RoomBD
 - Retrofit
