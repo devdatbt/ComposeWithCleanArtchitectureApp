@@ -7,8 +7,10 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.runtime.Composable
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -30,9 +32,13 @@ fun NoteHomeScreen(
     navController: NavController = NavController(LocalContext.current),
     viewModel: NoteViewModel = hiltViewModel()
 ) {
-    val notes = viewModel.listNoteState.collectAsStateWithLifecycle()
+    val notes = viewModel.listNoteStateIn.collectAsStateWithLifecycle(emptyList())
     val currency = viewModel.statusGetCurrencyApi.observeAsState()
     val scaffoldState = rememberScaffoldState()
+    // remember value after change state
+    var searchValue by rememberSaveable {
+        mutableStateOf("")
+    }
 
     Scaffold(
         backgroundColor = MyAppTheme.color.backgroundApp,
@@ -56,7 +62,7 @@ fun NoteHomeScreen(
                     .fillMaxSize()
                     .padding(10.dp)
             ) {
-                // show top bar view
+                // header
                 TopBarView(
                     onClickTopBar = {},
                     icon = Icons.Filled.Home,
@@ -70,13 +76,17 @@ fun NoteHomeScreen(
                     text = "1 USD = ${currency.value?.data?.usdVnd?.convertCurrency() ?: "..."} VND"
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                // show lists note
+                SearchView(searchValue) {
+                    searchValue = it
+                }
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = stringResource(id = R.string.tv_lists_note),
                     style = MyAppTheme.typography.subTitle
                 )
                 LazyColumn(modifier = Modifier.wrapContentHeight()) {
-                    items(notes.value) { note ->
+                    val listNote = viewModel.searchListNoteWith(searchValue, listFilter = notes.value)
+                    items(listNote) { note ->
                         ItemNoteScreen(note = note,
                             modifier = Modifier.fillMaxWidth(),
                             onItemClick = {
@@ -94,9 +104,29 @@ fun NoteHomeScreen(
 }
 
 @Composable
+fun SearchView(value: String, onValueChange: (String) -> Unit) {
+    OutlinedTextField(modifier = Modifier.fillMaxWidth(),
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Email Icon"
+            )
+        },
+        maxLines = 1,
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(text = "Search") },
+        placeholder = { Text(text = "Input...") })
+}
+
+@Composable
 @Preview
 fun PreviewNoteHomeScreen() {
-//    TopBarView(onClickTopBar = {
-//
-//    })
+    // remember value after change state
+    var searchValue by remember {
+        mutableStateOf("")
+    }
+    SearchView(value = searchValue, onValueChange = {
+        searchValue = it
+    })
 }

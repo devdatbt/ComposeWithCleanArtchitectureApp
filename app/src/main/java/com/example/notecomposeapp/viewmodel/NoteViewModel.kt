@@ -10,22 +10,30 @@ import com.example.notecomposeapp.usecase.AppUseCase
 import com.example.notecomposeapp.utils.EventNote
 import com.example.notecomposeapp.utils.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class NoteViewModel @Inject constructor(private val appUseCase: AppUseCase) : BaseViewModel() {
-    private val LOG_TAG = NoteViewModel::class.java.simpleName
+    private val TAG = NoteViewModel::class.java.simpleName
+
     private val _statusGetCurrency: MutableLiveData<Resource<Currency>> = MutableLiveData()
-    val statusGetCurrencyApi: LiveData<Resource<Currency>>
-        get() = _statusGetCurrency
+    val statusGetCurrencyApi: LiveData<Resource<Currency>> get() = _statusGetCurrency
 
-    private var _listNoteState = MutableStateFlow<List<Note>>(emptyList())
-    val listNoteState = _listNoteState.asStateFlow()
+    val listNoteShareIn = appUseCase.getNoteListsUseCase.invoke()
+        .catch {
+            this.emit(emptyList())
+        }.onCompletion { isSuccessfully ->
+            if (isSuccessfully == null)
+                Log.e(TAG, "Success ${Thread.currentThread().name}")
+            else
+                Log.e(TAG, "Failed: $isSuccessfully")
+        }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000))
 
+    /** Flow to StateFlow */
+    private var _listNoteStateIn = MutableStateFlow<List<Note>>(emptyList())
+    val listNoteStateIn get() = _listNoteStateIn.asStateFlow()
 
     init {
         getCurrencyFromServer()
@@ -35,29 +43,16 @@ class NoteViewModel @Inject constructor(private val appUseCase: AppUseCase) : Ba
     private fun getAllNoteFromDB() {
         launchDataLoad {
             appUseCase.getNoteListsUseCase.invoke()
-                .catch {
-                    this.emit(emptyList())
+                .onEach {
+                    _listNoteStateIn.value = it
                 }
-                .onCompletion { cause ->
-                    if (cause == null)
-                        Log.e(LOG_TAG, "Success ${Thread.currentThread().name}")
+                .catch { emit(emptyList()) }
+                .onCompletion { isSuccessfully ->
+                    if (isSuccessfully == null)
+                        Log.e(TAG, "getAllNoteFromDB Success ${Thread.currentThread().name}")
                     else
-                        Log.e(LOG_TAG, "Failed: $cause")
-                }
-                .collect {
-                    _listNoteState.value = it
-                }
-        }
-    }
-
-    private fun searchNoteWith(keyWord: String) {
-        launchDataLoad {
-            _listNoteState.value.asFlow()
-                .filter {
-                    it.title.equals(keyWord)
-                }
-                .flowOn(Dispatchers.Default)
-                .launchIn(viewModelScope)
+                        Log.e(TAG, "getAllNoteFromDB Failed: $isSuccessfully")
+                }.stateIn(viewModelScope)
         }
     }
 
@@ -94,10 +89,21 @@ class NoteViewModel @Inject constructor(private val appUseCase: AppUseCase) : Ba
     private fun launchDataLoad(block: suspend () -> Unit): Job {
         return viewModelScope.launch {
             try {
+                Log.e(TAG, "launchDataLoad is run with thread: ${Thread.currentThread().name}")
                 block.invoke()
             } catch (error: Throwable) {
                 error.printStackTrace()
+            } finally {
+                Log.e(TAG, "launchDataLoad is finally with thread: ${Thread.currentThread().name}")
             }
+        }
+    }
+
+    fun searchListNoteWith(searchValue: String, listFilter: List<Note>): List<Note> {
+        return if (searchValue.isEmpty()) {
+            listFilter
+        } else {
+            listFilter.filter { note -> note.getTitleContainsWord(searchValue) }
         }
     }
 

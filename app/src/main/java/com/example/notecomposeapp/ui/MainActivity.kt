@@ -29,17 +29,20 @@ class MainActivity : ComponentActivity() {
     }
 }
 const val ROUTE_UPDATE_NOTE = "add_note"
+const val ROUTE_HOME_NOTE = "home_note"
+const val PARAM_ITEM_NOTE = "item_note"
+
 @Composable
 fun NoteNavigationApp() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "home_note") {
-        composable("home_note") {
+    NavHost(navController = navController, startDestination = ROUTE_HOME_NOTE) {
+        composable(ROUTE_HOME_NOTE) {
             NoteHomeScreen(navController)
         }
-        composable("$ROUTE_UPDATE_NOTE/{item_note}", arguments = listOf(navArgument("item_note") {
+        composable("$ROUTE_UPDATE_NOTE/{$PARAM_ITEM_NOTE}", arguments = listOf(navArgument(PARAM_ITEM_NOTE) {
             type = NavType.StringType
         })) { navBackStack ->
-            val itemNote = navBackStack.arguments?.getString("item_note")
+            val itemNote = navBackStack.arguments?.getString(PARAM_ITEM_NOTE)
             if (itemNote.equals("{}")) {
                 AddUpdateNoteScreen(navController = navController, note = null)
             } else {
