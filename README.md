@@ -1,4 +1,4 @@
-# CleanArchitecture Hilt Coroutine Flow
+# README
 
 Technologies:
 - Compose
