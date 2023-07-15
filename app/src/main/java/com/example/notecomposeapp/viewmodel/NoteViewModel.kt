@@ -99,6 +99,14 @@ class NoteViewModel @Inject constructor(private val appUseCase: AppUseCase) : Ba
         }
     }
 
+    fun searchListNoteWith(searchValue: String, listFilter: List<Note>): List<Note> {
+        return if (searchValue.isEmpty()) {
+            listFilter
+        } else {
+            listFilter.filter { note -> note.getTitleContainsWord(searchValue) }
+        }
+    }
+
     fun onEventNote(event: EventNote) {
         when (event) {
             is EventNote.EventInsertNote -> {

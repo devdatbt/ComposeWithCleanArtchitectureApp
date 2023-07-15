@@ -24,14 +24,13 @@ fun ItemNoteScreen(
     onItemClick: () -> Unit,
     onDeleteItemClick: (Note) -> Unit
 ) {
-    Surface(color = MyAppTheme.color.backgroundCard,
+    Surface(color = MyAppTheme.color.greenColor,
         shape = RoundedCornerShape(10.dp),
         modifier = modifier
             .fillMaxWidth()
             .clickable {
                 onItemClick.invoke()
             }) {
-
         Row(
             modifier = modifier
                 .padding(10.dp)
