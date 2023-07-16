@@ -21,7 +21,7 @@ class NoteViewModel @Inject constructor(private val appUseCase: AppUseCase) : Ba
     private val _statusGetCurrency: MutableLiveData<Resource<Currency>> = MutableLiveData()
     val statusGetCurrencyApi: LiveData<Resource<Currency>> get() = _statusGetCurrency
 
-    val listNoteShareIn = appUseCase.getNoteListsUseCase.invoke()
+    val listNoteShareIn : SharedFlow<List<Note>> = appUseCase.getNoteListsUseCase.invoke()
         .catch {
             this.emit(emptyList())
         }.onCompletion { isSuccessfully ->
@@ -43,16 +43,15 @@ class NoteViewModel @Inject constructor(private val appUseCase: AppUseCase) : Ba
     private fun getAllNoteFromDB() {
         launchDataLoad {
             appUseCase.getNoteListsUseCase.invoke()
-                .onEach {
-                    _listNoteStateIn.value = it
-                }
                 .catch { emit(emptyList()) }
                 .onCompletion { isSuccessfully ->
                     if (isSuccessfully == null)
                         Log.e(TAG, "getAllNoteFromDB Success ${Thread.currentThread().name}")
                     else
                         Log.e(TAG, "getAllNoteFromDB Failed: $isSuccessfully")
-                }.stateIn(viewModelScope)
+                }.collect {
+                    _listNoteStateIn.value = it
+                }
         }
     }
 
