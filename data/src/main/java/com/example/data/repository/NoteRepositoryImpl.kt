@@ -6,6 +6,7 @@ import com.example.domain.model.Note
 import com.example.domain.repository.NoteRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -13,7 +14,7 @@ import javax.inject.Inject
 
 class NoteRepositoryImpl @Inject constructor(private val noteDao: NoteDao) : NoteRepository {
 
-    private val dispatcherDefault = Dispatchers.IO
+    private val dispatchersIO = Dispatchers.IO
 
     override val getAllNotes: Flow<List<Note>>
         get() = noteDao.getNoteLists()
@@ -21,19 +22,20 @@ class NoteRepositoryImpl @Inject constructor(private val noteDao: NoteDao) : Not
                 it.map { itemNote ->
                     itemNote.toNote()
                 }
-            }.flowOn(dispatcherDefault)
+            }.flowOn(dispatchersIO)
+            .conflate()
 
-    override suspend fun insertNote(note: Note) = withContext(dispatcherDefault) {
+    override suspend fun insertNote(note: Note) = withContext(dispatchersIO) {
         val noteEntity = NoteEntity.fromNote(note)
         noteDao.insertNote(noteEntity)
     }
 
     override suspend fun updateNote(title: String, content: String, time: Long) =
-        withContext(dispatcherDefault) {
+        withContext(dispatchersIO) {
             noteDao.updateNote(title = title, content = content, time = time)
         }
 
-    override suspend fun deleteNote(note: Note) = withContext(dispatcherDefault) {
+    override suspend fun deleteNote(note: Note) = withContext(dispatchersIO) {
         val noteEntity = NoteEntity.fromNote(note)
         noteDao.deleteNote(noteEntity)
     }
@@ -43,6 +45,7 @@ class NoteRepositoryImpl @Inject constructor(private val noteDao: NoteDao) : Not
             .map {
                 it.toNote()
             }
-            .flowOn(dispatcherDefault)
+            .flowOn(dispatchersIO)
+            .conflate()
     }
 }

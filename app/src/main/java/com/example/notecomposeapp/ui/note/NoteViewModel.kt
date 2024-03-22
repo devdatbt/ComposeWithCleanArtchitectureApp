@@ -1,5 +1,6 @@
-package com.example.notecomposeapp.viewmodel
+package com.example.notecomposeapp.ui.note
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -8,23 +9,37 @@ import com.example.domain.model.Note
 import com.example.notecomposeapp.usecase.AppUseCase
 import com.example.notecomposeapp.utils.EventNote
 import com.example.notecomposeapp.utils.Resource
+import com.example.notecomposeapp.ext.isValidEmail
+import com.example.notecomposeapp.viewmodel.BaseViewModel
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class NoteViewModel @Inject constructor(private val appUseCase: AppUseCase) : BaseViewModel() {
+class NoteViewModel @Inject constructor(
+    private val appUseCase: AppUseCase,
+    private val auth: FirebaseAuth
+) : BaseViewModel() {
+    private val TAG = NoteViewModel::class.java.simpleName
 
     private val _statusGetCurrency: MutableLiveData<Resource<Currency>> = MutableLiveData()
-    val statusGetCurrencyApi: LiveData<Resource<Currency>>
-        get() = _statusGetCurrency
+    val statusGetCurrencyApi: LiveData<Resource<Currency>> get() = _statusGetCurrency
 
-    private var _listNoteState = MutableStateFlow<List<Note>>(emptyList())
-    val listNoteState = _listNoteState.asStateFlow()
+    val listNoteShareIn = appUseCase.getNoteListsUseCase.invoke()
+        .catch {
+            this.emit(emptyList())
+        }.onCompletion { isSuccessfully ->
+            if (isSuccessfully == null)
+                Log.e(TAG, "Success ${Thread.currentThread().name}")
+            else
+                Log.e(TAG, "Failed: $isSuccessfully")
+        }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000))
 
+    /** Flow to StateFlow */
+    private var _listNoteStateIn = MutableStateFlow<List<Note>>(emptyList())
+    val listNoteStateIn get() = _listNoteStateIn.asStateFlow()
 
     init {
         getCurrencyFromServer()
@@ -33,21 +48,17 @@ class NoteViewModel @Inject constructor(private val appUseCase: AppUseCase) : Ba
 
     private fun getAllNoteFromDB() {
         launchDataLoad {
-            appUseCase.getNoteListsUseCase.invoke().onEach {
-                _listNoteState.value = it
-            }.catch {
-                 this.emit(emptyList())
-            }.launchIn(viewModelScope)
-        }
-    }
-
-    private fun searchNoteWith(keyWord: String) {
-        launchDataLoad {
-            _listNoteState.value.asFlow()
-                .filter {
-                it.title.equals(keyWord) }
-                .flowOn(Dispatchers.Default)
-                .launchIn(viewModelScope)
+            appUseCase.getNoteListsUseCase.invoke()
+                .onEach {
+                    _listNoteStateIn.value = it
+                }
+                .catch { emit(emptyList()) }
+                .onCompletion { isSuccessfully ->
+                    if (isSuccessfully == null)
+                        Log.e(TAG, "getAllNoteFromDB Success ${Thread.currentThread().name}")
+                    else
+                        Log.e(TAG, "getAllNoteFromDB Failed: $isSuccessfully")
+                }.stateIn(viewModelScope)
         }
     }
 
@@ -81,13 +92,18 @@ class NoteViewModel @Inject constructor(private val appUseCase: AppUseCase) : Ba
         }
     }
 
-    private fun launchDataLoad(block: suspend () -> Unit): Job {
-        return viewModelScope.launch {
-            try {
-                block.invoke()
-            } catch (error: Throwable) {
-                error.printStackTrace()
-            }
+    fun signOut(backToLogin: () -> Unit) {
+        launchDataLoad {
+            appUseCase.signOutUseCase.invoke()
+            backToLogin.invoke()
+        }
+    }
+
+    fun searchListNoteWith(searchValue: String, listFilter: List<Note>): List<Note> {
+        return if (searchValue.isEmpty()) {
+            listFilter
+        } else {
+            listFilter.filter { note -> note.getTitleContainsWord(searchValue) }
         }
     }
 

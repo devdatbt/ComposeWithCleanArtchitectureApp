@@ -1,4 +1,4 @@
-package com.example.notecomposeapp.ui
+package com.example.notecomposeapp.ui.common
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.notecomposeapp.R
-import com.example.notecomposeapp.ui.theme.MyAppTheme
+import com.example.notecomposeapp.theme.MyAppTheme
 
 
 @Composable

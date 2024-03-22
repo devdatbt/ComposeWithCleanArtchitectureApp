@@ -2,7 +2,11 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'kotlin-kapt'
-    id("com.google.dagger.hilt.android")
+    id 'com.google.dagger.hilt.android'
+    id 'jacoco'
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
+    id("com.google.firebase.firebase-perf")
 }
 
 android {
@@ -26,6 +30,9 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            testCoverageEnabled true
         }
     }
     compileOptions {
@@ -59,6 +66,14 @@ dependencies {
     implementation project(path: ':domain')
     implementation project(path: ':data')
 
+    // Import the BoM for the Firebase platform
+    implementation(platform("com.google.firebase:firebase-bom:32.5.0"))
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+
+    // Declare the dependency for the Firebase Authentication library
+    implementation 'com.google.firebase:firebase-auth-ktx'
+    implementation 'com.google.firebase:firebase-firestore-ktx:24.10.3'
+
     testImplementation 'junit:junit:4.13.2'
     def composeBom = platform('androidx.compose:compose-bom:2023.04.01')
     implementation composeBom
@@ -83,6 +98,11 @@ dependencies {
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
 
+    // mockito
+    def mockito_version = "4.0.0"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockito_version"
+    testImplementation "org.mockito:mockito-inline:$mockito_version"
+
     // Optional - Included automatically by material, only add when you need
     // the icons but not the material library (e.g. when using Material3 or a
     // custom design system based on Foundation)
@@ -91,20 +111,19 @@ dependencies {
     implementation 'androidx.compose.material:material-icons-extended'
     // Optional - Add window size utils
     implementation 'androidx.compose.material3:material3-window-size-class'
+    // Optional - Integration with LiveData
+    implementation 'androidx.compose.runtime:runtime-livedata'
 
 //    // Optional - Integration with activities
 //    implementation 'androidx.activity:activity-compose:1.7.2'
 //    // Optional - Integration with ViewModels
 //    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1'
-    // Optional - Integration with LiveData
-    implementation 'androidx.compose.runtime:runtime-livedata'
 //    // Optional - Integration with RxJava
 //    implementation 'androidx.compose.runtime:runtime-rxjava2'
 
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.1")
 
     def nav_version = "2.5.3"
-
     implementation "androidx.navigation:navigation-compose:$nav_version"
 
     /** roomDB **/
@@ -141,4 +160,38 @@ dependencies {
     /** gson */
     implementation 'com.google.code.gson:gson:2.10.1'
 
+}
+
+task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'createDebugCoverageReport']) {
+    jacoco {
+        toolVersion = "0.8.7"
+    }
+
+    reports {
+        html.enabled = true
+    }
+
+    /* avoid classes not using jacoco */
+    def fileFilter = [
+            '*/BuildConfig.',
+            '*/Manifest.*',
+            '**/R.class',
+            '*/R$.class',
+            '*/Manifest.*',
+            '*/*$ViewBinder.*',
+            '*/*$ViewInjector.*',
+            '*/Lambda$.class',
+            '**/Lambda.class',
+            '**/*Lambda.class',
+            '*/*Lambda.class'
+    ]
+    def debugTree = fileTree(dir: "$buildDir/tmp/kotlin-classes/debug", excludes: fileFilter)
+    def mainSrc = "${project.projectDir}/src/main/java"
+
+    sourceDirectories.setFrom(files([mainSrc]))
+    classDirectories.setFrom(files([debugTree]))
+    executionData.setFrom(fileTree(dir: project.buildDir, includes: [
+            '/jacoco/testDebugUnitTest.exec',
+            '/outputs/code_coverage/debugAndroidTest/connected/*.ec'
+    ]))
 }

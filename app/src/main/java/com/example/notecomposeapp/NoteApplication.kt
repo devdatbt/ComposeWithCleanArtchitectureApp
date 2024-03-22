@@ -1,7 +1,13 @@
 package com.example.notecomposeapp
 
-import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
+import android.app.Application
+import com.google.firebase.FirebaseApp
 
 @HiltAndroidApp
-class NoteApplication : Application()
+class NoteApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        FirebaseApp.initializeApp(this)
+    }
+}

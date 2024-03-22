@@ -9,5 +9,7 @@ data class AppUseCase @Inject constructor(
     val getNoteListsUseCase: GetNoteListsUseCase,
     val getNoteWithIdUseCase: GetNoteWithIdUseCase,
     val updateNoteUseCase: UpdateNoteUseCase,
-    val getCurrencyUseCase: GetCurrencyUseCase
+    val getCurrencyUseCase: GetCurrencyUseCase,
+    val autheticateUseCase:AutheticateUseCase,
+    val signOutUseCase: SignOutUseCase
 )

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "462203833931",
+    "project_id": "demofirebase-896ac",
+    "storage_bucket": "demofirebase-896ac.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:462203833931:android:2f083fad586efaae8a07ce",
+        "android_client_info": {
+          "package_name": "com.example.notecomposeapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApaR2sVqGEr466LZuIHuek0hu3VYTaW_E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

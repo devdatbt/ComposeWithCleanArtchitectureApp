@@ -1,4 +1,4 @@
-package com.example.notecomposeapp.ui
+package com.example.notecomposeapp.ui.note
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
@@ -13,17 +13,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.example.domain.model.Note
 import com.example.notecomposeapp.R
-import com.example.notecomposeapp.ui.theme.MyAppTheme
+import com.example.notecomposeapp.ext.popUp
+import com.example.notecomposeapp.ui.common.TopBarView
+import com.example.notecomposeapp.theme.MyAppTheme
 import com.example.notecomposeapp.utils.EventNote
-import com.example.notecomposeapp.viewmodel.NoteViewModel
 
 @Composable
 fun AddUpdateNoteScreen(
     note: Note? = null,
-    navController: NavController = NavController(LocalContext.current),
+    navHostController: NavHostController,
     viewModel: NoteViewModel = hiltViewModel()
 ) {
     var title by remember {
@@ -48,7 +49,7 @@ fun AddUpdateNoteScreen(
                 icon = Icons.Filled.ArrowBack,
                 title = stringResource(id = R.string.tv_update_note_app),
                 onClickTopBar = {
-                    navController.navigateUp()
+                    navHostController.popUp()
                 })
 
             OutlinedTextField(maxLines = 3, value = title, onValueChange = {
@@ -109,7 +110,7 @@ fun AddUpdateNoteScreen(
                         )
                     )
                 }
-                navController.navigateUp()
+                navHostController.popUp()
             }) {
                 Text(
                     text = stringResource(id = R.string.tv_save),
@@ -131,5 +132,5 @@ fun outLineTextFieldColors(): TextFieldColors {
 @Preview
 @Composable
 fun PreviewAddNoteScreen() {
-    AddUpdateNoteScreen()
+    //AddUpdateNoteScreen()
 }

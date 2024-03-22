@@ -1,4 +1,4 @@
-package com.example.notecomposeapp.ui
+package com.example.notecomposeapp.ui.note
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.domain.model.Note
-import com.example.notecomposeapp.ui.theme.MyAppTheme
+import com.example.notecomposeapp.theme.MyAppTheme
 import com.example.notecomposeapp.utils.Constant.DEFAULT_STRING
 
 @Composable
@@ -24,21 +24,20 @@ fun ItemNoteScreen(
     onItemClick: () -> Unit,
     onDeleteItemClick: (Note) -> Unit
 ) {
-    Surface(color = MyAppTheme.color.backgroundCard,
+    Surface(color = MyAppTheme.color.greenColor,
         shape = RoundedCornerShape(10.dp),
         modifier = modifier
             .fillMaxWidth()
             .clickable {
                 onItemClick.invoke()
             }) {
-
         Row(
             modifier = modifier
                 .padding(10.dp)
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column() {
+            Column(modifier = Modifier.weight(8f)) {
                 Text(
                     color = MyAppTheme.color.whiteColor,
                     text = note.title ?: DEFAULT_STRING,
@@ -55,6 +54,7 @@ fun ItemNoteScreen(
                 imageVector = Icons.Default.Delete,
                 contentDescription = "Delete item note",
                 modifier = Modifier
+                    .weight(1f)
                     .align(alignment = Alignment.CenterVertically)
                     .clickable {
                         onDeleteItemClick.invoke(note)
@@ -67,10 +67,10 @@ fun ItemNoteScreen(
 @Composable
 @Preview
 fun PreviewItemNoteScreen() {
-//    val note = Note(title = "Title", "Content note infomation", timestamp = 152563716)
-//    ItemNoteScreen(note, onItemClick = {
-//
-//    }, onDeleteItemClick = {
-//
-//    })
+    val note = Note(title = "Title", "Content note infomation", timestamp = 152563716)
+    ItemNoteScreen(note, onItemClick = {
+
+    }, onDeleteItemClick = {
+
+    })
 }
