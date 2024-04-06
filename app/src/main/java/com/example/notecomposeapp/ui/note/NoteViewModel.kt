@@ -9,11 +9,9 @@ import com.example.domain.model.Note
 import com.example.notecomposeapp.usecase.AppUseCase
 import com.example.notecomposeapp.utils.EventNote
 import com.example.notecomposeapp.utils.Resource
-import com.example.notecomposeapp.ext.isValidEmail
 import com.example.notecomposeapp.viewmodel.BaseViewModel
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 

@@ -24,6 +24,7 @@ data class AppColor(
     val backgroundApp: Color = Color.Unspecified,
     val whiteColor: Color = Color.Unspecified,
     val greenColor: Color = Color.Unspecified,
+    val grayColor: Color = Color.Unspecified,
 )
 
 val LocalAppTypography = staticCompositionLocalOf {
@@ -55,13 +56,15 @@ fun MyAppTheme(
         greenColor = Color(0xFF82B70B),
         whiteColor = Color(0xFFFFFFFF),
         backgroundApp = Color(0xFFFFFFFF),
-        backgroundCard = Color(0xFFFB7D8A)
+        backgroundCard = Color(0xFFFB7D8A),
+        grayColor = Color(0xE2E2E1E1)
     ) else AppColor(
         blackColor = Color(0xFF000000),
         greenColor = Color(0xFF82B70B),
         whiteColor = Color(0xFFFFFFFF),
         backgroundApp = Color(0xFFFFFFFF),
-        backgroundCard = Color(0xFFFB7D8A)
+        backgroundCard = Color(0xFFFB7D8A),
+        grayColor = Color(0xE2E2E1E1)
     )
 
     CompositionLocalProvider(LocalAppTypography provides typography, LocalAppColor provides color) {

@@ -1,7 +1,9 @@
 package com.example.notecomposeapp.ui.login
 
 import android.util.Log
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.draggable
@@ -11,13 +13,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Password
-import androidx.compose.material.icons.filled.SupervisedUserCircle
-import androidx.compose.material.icons.filled.VerifiedUser
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.AnnotatedString
@@ -52,86 +53,105 @@ fun LoginScreen(
         backgroundColor = MyAppTheme.color.backgroundApp,
         scaffoldState = scaffoldState,
     ) { paddingContent ->
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
+
+        Box(
             modifier = Modifier
-                .fillMaxSize()
                 .padding(paddingContent)
-                .padding(20.dp)
+                .padding(30.dp, 100.dp)
+                .clip(shape = RoundedCornerShape(15.dp, 15.dp, 15.dp, 15.dp))
+                .border(BorderStroke(1.dp, MyAppTheme.color.grayColor))
+                .background(MyAppTheme.color.grayColor)
         ) {
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(20.dp)
+            ) {
 
-            Text(
-                text = "Login", color = MyAppTheme.color.blackColor,
-                style = MyAppTheme.typography.largeTitle,
-            )
+                Text(
+                    text = "Login", color = MyAppTheme.color.greenColor,
+                    style = MyAppTheme.typography.largeTitle,
+                )
 
-            TextFieldLogin(Icons.Default.SupervisedUserCircle, "Enter email.", uiState.email) {
-                viewModel.onEmailChange(it)
-            }
+                TextFieldLogin(
+                    false,
+                    Icons.Default.Person,
+                    "Enter email.",
+                    uiState.email
+                ) {
+                    viewModel.onEmailChange(it)
+                }
 
-            TextFieldLogin(Icons.Default.Password, "Enter password.", uiState.password) {
-                viewModel.onPassChange(it)
-            }
+                TextFieldLogin(
+                    true,
+                    Icons.Default.Security,
+                    "Enter password.",
+                    uiState.password
+                ) {
+                    viewModel.onPassChange(it)
+                }
 
-            Spacer(modifier = Modifier.height(20.dp))
-            Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
-                Button(
-                    onClick = {
-                        viewModel.authenticationEmail { isLoginSuccess ->
-                            if (isLoginSuccess) {
-                                navController.clearAndNavigate(ROUTE_HOME_NOTE)
-                            } else {
-                                coroutineScope.launch {
-                                    // using the `coroutineScope` to `launch` showing the snackbar
-                                    // taking the `snackbarHostState` from the attached `scaffoldState`
-                                    val snackbarResult =
-                                        scaffoldState.snackbarHostState.showSnackbar(
-                                            message = "This is your message",
-                                            actionLabel = "Do something."
-                                        )
-                                    when (snackbarResult) {
-                                        SnackbarResult.Dismissed -> Log.d(
-                                            "SnackbarDemo",
-                                            "Dismissed"
-                                        )
-                                        SnackbarResult.ActionPerformed -> Log.d(
-                                            "SnackbarDemo",
-                                            "Snackbar's button clicked"
-                                        )
+                Spacer(modifier = Modifier.height(20.dp))
+                Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
+                    Button(
+                        onClick = {
+                            viewModel.authenticationEmail { isLoginSuccess ->
+                                if (isLoginSuccess) {
+                                    navController.clearAndNavigate(ROUTE_HOME_NOTE)
+                                } else {
+                                    coroutineScope.launch {
+                                        // using the `coroutineScope` to `launch` showing the snackbar
+                                        // taking the `snackbarHostState` from the attached `scaffoldState`
+                                        val snackbarResult =
+                                            scaffoldState.snackbarHostState.showSnackbar(
+                                                message = "This is your message",
+                                                actionLabel = "Do something."
+                                            )
+                                        when (snackbarResult) {
+                                            SnackbarResult.Dismissed -> Log.d(
+                                                "SnackbarDemo",
+                                                "Dismissed"
+                                            )
+                                            SnackbarResult.ActionPerformed -> Log.d(
+                                                "SnackbarDemo",
+                                                "Snackbar's button clicked"
+                                            )
+                                        }
                                     }
                                 }
                             }
-                        }
-                    },
-                    shape = RoundedCornerShape(50.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                ) {
-                    Text(text = "Login")
+                        },
+                        shape = RoundedCornerShape(50.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(MyAppTheme.color.greenColor)
+                    ) {
+                        Text(text = "Login", style = TextStyle(color = MyAppTheme.color.whiteColor))
+                    }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(20.dp))
-        Box(modifier = Modifier.fillMaxSize()) {
-            ClickableText(
-                text = AnnotatedString("Sign up here"),
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(20.dp),
-                onClick = { },
-                style = TextStyle(
-                    fontSize = 14.sp,
-                    fontFamily = FontFamily.Default,
-                    textDecoration = TextDecoration.Underline,
-                    color = Purple700
+            Spacer(modifier = Modifier.height(20.dp))
+            Box(modifier = Modifier.fillMaxSize()) {
+                ClickableText(
+                    text = AnnotatedString("Sign up here"),
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(20.dp),
+                    onClick = { },
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontFamily = FontFamily.Default,
+                        textDecoration = TextDecoration.Underline,
+                        color = MyAppTheme.color.greenColor
+                    )
                 )
-            )
+            }
         }
     }
-
 }
 
 @Composable
