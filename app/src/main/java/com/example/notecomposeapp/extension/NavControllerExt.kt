@@ -1,4 +1,4 @@
-package com.example.notecomposeapp.ext
+package com.example.notecomposeapp.extension
 
 import androidx.navigation.NavHostController
 

@@ -12,7 +12,8 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-class AccountServiceImpl @Inject constructor(private val auth: FirebaseAuth) : AccountServiceRepository {
+class AccountServiceImpl @Inject constructor(private val auth: FirebaseAuth) :
+    AccountServiceRepository {
 
     override val currentUserId: String
         get() = auth.currentUser?.uid.orEmpty()
@@ -30,15 +31,28 @@ class AccountServiceImpl @Inject constructor(private val auth: FirebaseAuth) : A
             awaitClose { auth.removeAuthStateListener(listener) }
         }
 
-    override suspend fun authenticate(email: String, password: String) {
-        auth.signInWithEmailAndPassword(email, password).addOnCompleteListener {
-            task ->
-            if (task.isSuccessful) {
-                Log.d("AccountServiceImpl", "isSuccessful: ${task.isSuccessful}")
-            } else {
-                Log.e("AccountServiceImpl", "isSuccessful: ${task.isSuccessful}")
-            }
+    override suspend fun authenticate(
+        email: String,
+        password: String,
+        isLoginSuccess: (Boolean) -> Unit
+    ) {
+        auth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+            Log.e("AccountServiceImpl", "authenticate -- isSuccessful: ${task.isSuccessful}")
+            isLoginSuccess(task.isSuccessful)
         }.await()
+    }
+
+    override suspend fun createAccount(
+        email: String,
+        password: String,
+        isSignUpSuccess: (Boolean) -> Unit
+    ) {
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                Log.e("AccountServiceImpl",
+                    "createAccount -- isSignUpSuccess: ${task.isSuccessful}")
+                isSignUpSuccess(task.isSuccessful)
+            }
     }
 
     override suspend fun sendRecoveryEmail(email: String) {

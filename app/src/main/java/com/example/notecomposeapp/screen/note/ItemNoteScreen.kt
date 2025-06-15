@@ -1,4 +1,4 @@
-package com.example.notecomposeapp.ui.note
+package com.example.notecomposeapp.screen.note
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -24,7 +24,7 @@ fun ItemNoteScreen(
     onItemClick: () -> Unit,
     onDeleteItemClick: (Note) -> Unit
 ) {
-    Surface(color = MyAppTheme.color.greenColor,
+    Surface(color = MyAppTheme.color.lightBlueColor,
         shape = RoundedCornerShape(10.dp),
         modifier = modifier
             .fillMaxWidth()

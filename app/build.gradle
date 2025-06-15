@@ -82,8 +82,6 @@ dependencies {
     // Choose one of the following:
     // Material Design 3
     implementation 'androidx.compose.material3:material3'
-    // or Material Design 2
-    implementation 'androidx.compose.material:material'
     // or skip Material Design and build directly on top of foundational components
     implementation 'androidx.compose.foundation:foundation'
     // or only import the main APIs for the underlying toolkit systems,
@@ -122,6 +120,7 @@ dependencies {
 //    implementation 'androidx.compose.runtime:runtime-rxjava2'
 
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.1")
+    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"
 
     def nav_version = "2.5.3"
     implementation "androidx.navigation:navigation-compose:$nav_version"
@@ -159,6 +158,11 @@ dependencies {
 
     /** gson */
     implementation 'com.google.code.gson:gson:2.10.1'
+
+    /*Maps*/
+    implementation 'com.google.maps.android:maps-compose:2.7.2'
+    // Maps SDK for Android
+    implementation 'com.google.android.gms:play-services-maps:18.2.0'
 
 }
 

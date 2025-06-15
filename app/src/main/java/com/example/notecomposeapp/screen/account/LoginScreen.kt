@@ -1,26 +1,41 @@
-package com.example.notecomposeapp.ui.login
+package com.example.notecomposeapp.screen.account
 
-import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.rememberScaffoldState
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -32,26 +47,26 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.notecomposeapp.ext.clearAndNavigate
-import com.example.notecomposeapp.ui.ROUTE_HOME_NOTE
+import com.example.notecomposeapp.screen.main.ROUTE_MAIN
+import com.example.notecomposeapp.screen.main.ROUTE_SIGNUP_NOTE
+import com.example.notecomposeapp.extension.clearAndNavigate
+import com.example.notecomposeapp.screen.common.AccountTextFieldView
 import com.example.notecomposeapp.theme.MyAppTheme
-import com.example.notecomposeapp.theme.Purple700
-import com.example.notecomposeapp.ui.common.TextFieldLogin
-import kotlinx.coroutines.launch
+import com.example.notecomposeapp.utils.Constant.LOGIN_TITLE
+import com.example.notecomposeapp.utils.Constant.SIGNUP_TITLE
 import kotlin.math.roundToInt
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    accountViewModel: AccountViewModel = hiltViewModel()
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    val scaffoldState = rememberScaffoldState()
-    val viewModel: LoginViewModel = hiltViewModel()
-    val uiState by viewModel.uiState
+    val context = LocalContext.current
+    val uiState by accountViewModel.uiState
 
     Scaffold(
-        backgroundColor = MyAppTheme.color.backgroundApp,
-        scaffoldState = scaffoldState,
+        contentColor = MyAppTheme.color.grayColor
     ) { paddingContent ->
 
         Box(
@@ -59,8 +74,8 @@ fun LoginScreen(
                 .padding(paddingContent)
                 .padding(30.dp, 100.dp)
                 .clip(shape = RoundedCornerShape(15.dp, 15.dp, 15.dp, 15.dp))
-                .border(BorderStroke(1.dp, MyAppTheme.color.grayColor))
-                .background(MyAppTheme.color.grayColor)
+                .border(BorderStroke(1.dp, MyAppTheme.color.whiteColor))
+                .background(MyAppTheme.color.whiteColor)
         ) {
             Column(
                 verticalArrangement = Arrangement.Center,
@@ -71,55 +86,39 @@ fun LoginScreen(
             ) {
 
                 Text(
-                    text = "Login", color = MyAppTheme.color.greenColor,
+                    text = LOGIN_TITLE, color = MyAppTheme.color.lightBlueColor,
                     style = MyAppTheme.typography.largeTitle,
+                    modifier = Modifier.padding(horizontal = 10.dp, 20.dp)
                 )
 
-                TextFieldLogin(
-                    false,
-                    Icons.Default.Person,
-                    "Enter email.",
-                    uiState.email
+                AccountTextFieldView(
+                    isPasswordType = false,
+                    icon = Icons.Default.Person,
+                    label = "Enter email.",
+                    value = uiState.email
                 ) {
-                    viewModel.onEmailChange(it)
+                    accountViewModel.onEmailChange(it)
                 }
 
-                TextFieldLogin(
-                    true,
-                    Icons.Default.Security,
-                    "Enter password.",
-                    uiState.password
+                Spacer(modifier = Modifier.height(10.dp))
+                AccountTextFieldView(
+                    isPasswordType = true,
+                    icon = Icons.Default.Key,
+                    label = "Enter password.",
+                    value = uiState.password
                 ) {
-                    viewModel.onPassChange(it)
+                    accountViewModel.onPassChange(it)
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                Spacer(modifier = Modifier.height(40.dp))
                 Box(modifier = Modifier.padding(40.dp, 0.dp, 40.dp, 0.dp)) {
                     Button(
                         onClick = {
-                            viewModel.authenticationEmail { isLoginSuccess ->
+                            accountViewModel.authenticationEmail { isLoginSuccess ->
                                 if (isLoginSuccess) {
-                                    navController.clearAndNavigate(ROUTE_HOME_NOTE)
+                                    navController.clearAndNavigate(ROUTE_MAIN)
                                 } else {
-                                    coroutineScope.launch {
-                                        // using the `coroutineScope` to `launch` showing the snackbar
-                                        // taking the `snackbarHostState` from the attached `scaffoldState`
-                                        val snackbarResult =
-                                            scaffoldState.snackbarHostState.showSnackbar(
-                                                message = "This is your message",
-                                                actionLabel = "Do something."
-                                            )
-                                        when (snackbarResult) {
-                                            SnackbarResult.Dismissed -> Log.d(
-                                                "SnackbarDemo",
-                                                "Dismissed"
-                                            )
-                                            SnackbarResult.ActionPerformed -> Log.d(
-                                                "SnackbarDemo",
-                                                "Snackbar's button clicked"
-                                            )
-                                        }
-                                    }
+                                    Toast.makeText(context, "Error...", Toast.LENGTH_SHORT).show()
                                 }
                             }
                         },
@@ -127,9 +126,12 @@ fun LoginScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp),
-                        colors = ButtonDefaults.buttonColors(MyAppTheme.color.greenColor)
+                        colors = ButtonDefaults.buttonColors(MyAppTheme.color.lightBlueColor)
                     ) {
-                        Text(text = "Login", style = TextStyle(color = MyAppTheme.color.whiteColor))
+                        Text(
+                            text = LOGIN_TITLE,
+                            style = TextStyle(color = MyAppTheme.color.whiteColor)
+                        )
                     }
                 }
             }
@@ -137,16 +139,18 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(20.dp))
             Box(modifier = Modifier.fillMaxSize()) {
                 ClickableText(
-                    text = AnnotatedString("Sign up here"),
+                    text = AnnotatedString("Don't have an account? $SIGNUP_TITLE"),
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(20.dp),
-                    onClick = { },
+                    onClick = {
+                        navController.navigate(ROUTE_SIGNUP_NOTE)
+                    },
                     style = TextStyle(
                         fontSize = 14.sp,
                         fontFamily = FontFamily.Default,
                         textDecoration = TextDecoration.Underline,
-                        color = MyAppTheme.color.greenColor
+                        color = MyAppTheme.color.blackColor
                     )
                 )
             }

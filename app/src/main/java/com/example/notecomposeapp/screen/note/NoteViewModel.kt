@@ -1,39 +1,30 @@
-package com.example.notecomposeapp.ui.note
+package com.example.notecomposeapp.screen.note
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.domain.model.Currency
 import com.example.domain.model.Note
 import com.example.notecomposeapp.usecase.AppUseCase
 import com.example.notecomposeapp.utils.EventNote
 import com.example.notecomposeapp.utils.Resource
-import com.example.notecomposeapp.viewmodel.BaseViewModel
-import com.google.firebase.auth.FirebaseAuth
+import com.example.notecomposeapp.screen.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
 class NoteViewModel @Inject constructor(
-    private val appUseCase: AppUseCase,
-    private val auth: FirebaseAuth
+    private val appUseCase: AppUseCase
 ) : BaseViewModel() {
     private val TAG = NoteViewModel::class.java.simpleName
 
-    private val _statusGetCurrency: MutableLiveData<Resource<Currency>> = MutableLiveData()
-    val statusGetCurrencyApi: LiveData<Resource<Currency>> get() = _statusGetCurrency
-
-    val listNoteShareIn = appUseCase.getNoteListsUseCase.invoke()
-        .catch {
-            this.emit(emptyList())
-        }.onCompletion { isSuccessfully ->
-            if (isSuccessfully == null)
-                Log.e(TAG, "Success ${Thread.currentThread().name}")
-            else
-                Log.e(TAG, "Failed: $isSuccessfully")
-        }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(5000))
+    private val _statusGetCurrency = MutableStateFlow<Resource<Currency>>(Resource.start())
+    val statusGetCurrencyApi get() = _statusGetCurrency
 
     /** Flow to StateFlow */
     private var _listNoteStateIn = MutableStateFlow<List<Note>>(emptyList())
@@ -110,9 +101,11 @@ class NoteViewModel @Inject constructor(
             is EventNote.EventInsertNote -> {
                 insertNote(event.note)
             }
+
             is EventNote.EventUpdateNote -> {
                 updateNote(event.title, event.content, event.timestamp)
             }
+
             is EventNote.EventDeleteNote -> {
                 deleteNote(event.note)
             }

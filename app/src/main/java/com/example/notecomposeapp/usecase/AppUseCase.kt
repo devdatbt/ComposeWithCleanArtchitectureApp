@@ -11,5 +11,6 @@ data class AppUseCase @Inject constructor(
     val updateNoteUseCase: UpdateNoteUseCase,
     val getCurrencyUseCase: GetCurrencyUseCase,
     val autheticateUseCase:AutheticateUseCase,
-    val signOutUseCase: SignOutUseCase
+    val signOutUseCase: SignOutUseCase,
+    val createAccountUseCase: CreateAccountUseCase
 )

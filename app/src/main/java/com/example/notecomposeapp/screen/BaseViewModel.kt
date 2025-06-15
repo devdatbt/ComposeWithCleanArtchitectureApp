@@ -1,4 +1,4 @@
-package com.example.notecomposeapp.viewmodel
+package com.example.notecomposeapp.screen
 
 import android.util.Log
 import androidx.lifecycle.ViewModel

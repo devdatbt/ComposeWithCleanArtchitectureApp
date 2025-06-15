@@ -1,4 +1,4 @@
-package com.example.notecomposeapp.ext
+package com.example.notecomposeapp.extension
 
 import android.util.Patterns
 import java.util.regex.Pattern

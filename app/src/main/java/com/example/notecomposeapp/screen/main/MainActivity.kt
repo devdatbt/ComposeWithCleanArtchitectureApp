@@ -1,4 +1,4 @@
-package com.example.notecomposeapp.ui
+package com.example.notecomposeapp.screen.main
 
 import android.os.Bundle
 import android.util.Log
@@ -10,10 +10,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.domain.model.Note
-import com.example.notecomposeapp.ui.login.LoginScreen
+import com.example.notecomposeapp.R
+import com.example.notecomposeapp.screen.account.LoginScreen
 import com.example.notecomposeapp.theme.MyAppTheme
-import com.example.notecomposeapp.ui.note.AddUpdateNoteScreen
-import com.example.notecomposeapp.ui.note.NoteHomeScreen
+import com.example.notecomposeapp.screen.account.SignUpScreen
+import com.example.notecomposeapp.screen.googlemap.GoogleMapScreen
+import com.example.notecomposeapp.screen.note.AddUpdateNoteScreen
+import com.example.notecomposeapp.screen.note.NoteHomeScreen
+import com.example.notecomposeapp.theme.AppTheme
 import com.example.notecomposeapp.utils.jsonToObject
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.AndroidEntryPoint
@@ -39,14 +43,16 @@ const val ROUTE_UPDATE_NOTE = "add_note"
 const val ROUTE_HOME_NOTE = "home_note"
 const val PARAM_ITEM_NOTE = "item_note"
 const val ROUTE_LOGIN_NOTE = "login_note"
+const val ROUTE_SIGNUP_NOTE = "signup_note"
+const val ROUTE_MAIN = "main_screen"
+const val ROUTE_GOOGLE_MAP = "google_map_screen"
 
 @Composable
 fun NoteNavigationApp(auth: FirebaseAuth) {
     // Check if user is signed in (non-null) and update UI accordingly.
     var startDestination = ROUTE_LOGIN_NOTE
     if (auth.currentUser != null) {
-        Log.d("Datbt","auth.currentUser != null")
-        startDestination = ROUTE_HOME_NOTE
+        startDestination = ROUTE_MAIN
     }
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = startDestination) {
@@ -61,6 +67,11 @@ fun NavGraphBuilder.noteNavGraph(navController: NavHostController) {
         LoginScreen(navController)
     }
 
+    // signup
+    composable(ROUTE_SIGNUP_NOTE) {
+        SignUpScreen(navController)
+    }
+
     //update
     composable(
         "$ROUTE_UPDATE_NOTE/{$PARAM_ITEM_NOTE}",
@@ -70,15 +81,33 @@ fun NavGraphBuilder.noteNavGraph(navController: NavHostController) {
     ) { navBackStack ->
         val itemNote = navBackStack.arguments?.getString(PARAM_ITEM_NOTE)
         if (itemNote.equals("{}")) {
-            AddUpdateNoteScreen(note = null, navHostController = navController)
+            AddUpdateNoteScreen(
+                R.string.tv_add_note_app,
+                note = null,
+                navHostController = navController
+            )
         } else {
             val note: Note = itemNote!!.jsonToObject(Note::class.java)
-            AddUpdateNoteScreen(note = note, navHostController = navController)
+            AddUpdateNoteScreen(
+                R.string.tv_update_note_app,
+                note = note,
+                navHostController = navController
+            )
         }
     }
 
-    //hone
-    composable(ROUTE_HOME_NOTE) {
-        NoteHomeScreen(navController)
+//    //home
+//    composable(ROUTE_HOME_NOTE) {
+//        NoteHomeScreen(navController)
+//    }
+
+    //main screen
+    composable(ROUTE_MAIN) {
+        MainScreen(navController)
     }
+
+//    //google map screen
+//    composable(ROUTE_GOOGLE_MAP) {
+//        GoogleMapScreen()
+//    }
 }

@@ -23,7 +23,7 @@ data class AppColor(
     val backgroundCard: Color = Color.Unspecified,
     val backgroundApp: Color = Color.Unspecified,
     val whiteColor: Color = Color.Unspecified,
-    val greenColor: Color = Color.Unspecified,
+    val lightBlueColor: Color = Color.Unspecified,
     val grayColor: Color = Color.Unspecified,
 )
 
@@ -41,26 +41,28 @@ fun MyAppTheme(
 ) {
     val typography = AppTypography(
         largeTitle = TextStyle(
-            fontFamily = FontFamily.Monospace, fontSize = 32.sp, fontWeight = FontWeight.Bold
+            fontFamily = FontFamily.Serif, fontSize = 24.sp, fontWeight = FontWeight.Bold,
+            color = Color(0xFF2196F3)
         ), title = TextStyle(
-            fontFamily = FontFamily.Monospace, fontSize = 24.sp, fontWeight = FontWeight.Bold
+            fontFamily = FontFamily.Serif, fontSize = 20.sp, fontWeight = FontWeight.Bold,
+            color = Color(0xFF2196F3)
         ), subTitle = TextStyle(
-            fontFamily = FontFamily.Monospace, fontSize = 18.sp, fontWeight = FontWeight.Bold
+            fontFamily = FontFamily.Serif, fontSize = 18.sp, fontWeight = FontWeight.Normal
         ), body = TextStyle(
-            fontFamily = FontFamily.Monospace, fontSize = 16.sp, fontWeight = FontWeight.Normal
+            fontFamily = FontFamily.Serif, fontSize = 16.sp, fontWeight = FontWeight.Normal
         )
     )
 
     val color = if (isDark) AppColor(
         blackColor = Color(0xFF000000),
-        greenColor = Color(0xFF82B70B),
+        lightBlueColor = Color(0xFF2196F3),
         whiteColor = Color(0xFFFFFFFF),
         backgroundApp = Color(0xFFFFFFFF),
         backgroundCard = Color(0xFFFB7D8A),
         grayColor = Color(0xE2E2E1E1)
     ) else AppColor(
         blackColor = Color(0xFF000000),
-        greenColor = Color(0xFF82B70B),
+        lightBlueColor = Color(0xFF1E88E5),
         whiteColor = Color(0xFFFFFFFF),
         backgroundApp = Color(0xFFFFFFFF),
         backgroundCard = Color(0xFFFB7D8A),
